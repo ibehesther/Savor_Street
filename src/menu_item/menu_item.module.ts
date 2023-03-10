@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MenuItemController } from "./menu_item.controller";
 import { MenuItem } from "./menu_item.entity";
@@ -9,4 +9,10 @@ import { MenuItemService } from "./menu_item.service";
     controllers: [MenuItemController],
     providers: [MenuItemService]
 })
-export class MenuItemModule {}
+export class MenuItemModule {
+    // configure(consumer: MiddlewareConsumer) {
+    //     consumer
+    //         .apply(SessionMiddleware)
+    //         .forRoutes(MenuItemController)
+    // }
+}

@@ -13,7 +13,7 @@ export class MenuItemService{
         private menuItemRepository: Repository<MenuItem>
     ) {}
 
-    async getAll(query: APIFeatures): Promise<MenuItem[]> {
+    async getAll(query: APIFeatures, ): Promise<MenuItem[]> {
         let { page= 1, limit= 10 } = query;
         page *= 1;
         limit *= 1;

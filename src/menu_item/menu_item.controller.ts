@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, Query, UsePipes } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, Query, Session, UsePipes, Req} from "@nestjs/common";
+import { Request } from "express";
 import { APIFeatures } from "src/dto/apiFeatures.dto";
 import { CreateMenuItemDTO } from "src/dto/create_menu_item.dto";
 import { UpdateMenuItemDTO } from "src/dto/update_menu_item.dto";
@@ -11,7 +12,8 @@ export class MenuItemController {
     constructor(private readonly menuItemService: MenuItemService) {}
 
     @Get()
-   async getAllMenuItems(@Query() query: APIFeatures ) {
+    async getAllMenuItems(@Session() session: Record<string, any>, @Query() query: APIFeatures ) {
+        console.log(session)
         return await this.menuItemService.getAll(query)
     }
 
