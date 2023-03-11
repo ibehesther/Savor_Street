@@ -6,7 +6,10 @@ import { connection } from 'ormconfig';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MenuItemModule } from './menu_item/menu_item.module';
+import { OrderModule } from './order/order.module';
+import { OrderItemModule } from './order_item/order_item.module';
 import { ValidationPipe } from './pipes/validation.pipe';
+import { ReviewModule } from './review/review.module';
 import { UserModule } from './user/user.module';
 
 @Module({
@@ -23,7 +26,10 @@ import { UserModule } from './user/user.module';
       inject: [ConfigService]
     }),
     MenuItemModule,
-    UserModule
+    UserModule,
+    OrderItemModule,
+    OrderModule,
+    ReviewModule
   ],
   controllers: [AppController],
   providers: [

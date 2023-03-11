@@ -1,5 +1,4 @@
-import { Entity , PrimaryGeneratedColumn, Column, DeleteDateColumn, BaseEntity, PrimaryColumn, Index } from "typeorm";
-import { v4 as uuidv4 } from 'uuid';
+import { Entity , PrimaryGeneratedColumn, Column, BaseEntity, } from "typeorm";
 
 @Entity('users')
 export class User extends BaseEntity{
