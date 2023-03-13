@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Req, Res } from "@nestjs/common";
+import { Body, Controller, Get, Post, Req, Res } from "@nestjs/common";
 import { ConfigService } from '@nestjs/config';
 import { config } from 'dotenv';
 import jwt from "jsonwebtoken";
@@ -18,14 +18,14 @@ const generateJWT= (id: string) => {
     return token;
 }
 
-@Controller('users')
+@Controller('api/users')
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
-    @Get()
+    @Post()
     async getUserSessionId(@Req() req: Request, @Res() res: Response, @Body(new ValidationPipe()) body: {user_id: string}){
         let userId = body.user_id;
-
+        console.log(userId);
         if(userId){
             let user = await this.userService.getUser(userId);
             const token = generateJWT(userId);
@@ -34,7 +34,7 @@ export class UserController {
                 maxAge: 86400000, //valid for 1 day
                 httpOnly: true
             }).status(200).json(user);
-            return;
+            return user
         }
 
         let userAgentString = req.headers['user-agent'];
@@ -55,6 +55,6 @@ export class UserController {
             maxAge: 86400000, //valid for 1 day
             httpOnly: true
         }).status(201).json(new_user);
-        return;
+        return new_user
     }
 }

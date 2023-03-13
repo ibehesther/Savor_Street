@@ -6,7 +6,7 @@ import { ValidationPipe } from "src/pipes/validation.pipe";
 import { ReviewService } from "./review.service";
 
 
-@Controller('reviews')
+@Controller('api/reviews')
 export class ReviewController {
     constructor(private readonly reviewService: ReviewService) {}
 

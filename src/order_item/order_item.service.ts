@@ -31,10 +31,10 @@ export class OrderItemService{
         })
     }
 
-    async getById(id: number): Promise<OrderItem | HttpException> {
-        let orderItem =await this.orderItemRepository.findOneBy({id})
+    async getByOrderId(id: number): Promise<OrderItem[] | HttpException> {
+        let orderItem =await this.orderItemRepository.findBy({order_id: id})
 
-        if(!orderItem) throw new NotFoundException(`Order Item with id- ${id} was not found in the database`);
+        if(!orderItem) throw new NotFoundException(`No Item with order id- ${id} was not found in the database`);
 
         return orderItem;
     }

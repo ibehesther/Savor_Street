@@ -31,12 +31,12 @@ export class OrderService{
         })
     }
 
-    async getById(id: number): Promise<Order | HttpException> {
-        let order =await this.orderRepository.findOneBy({id})
+    async getByUserId(id: string): Promise<Order[] | HttpException> {
+        let orders =await this.orderRepository.findBy({user_id: id})
 
-        if(!order) throw new NotFoundException(`Order with id- ${id} was not found in the database`);
+        if(!orders) throw new NotFoundException(`Orders for user was not found in the database`);
 
-        return order;
+        return orders;
     }
 
     async create(body: CreateOrderDTO): Promise<Order | HttpException> {

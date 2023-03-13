@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, Query, Session, UsePipes, Req} from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, Query, Session, UsePipes, Req, ParseUUIDPipe} from "@nestjs/common";
 import { Request } from "express";
 import { APIFeatures } from "src/dto/apiFeatures.dto";
 import { CreateOrderDTO } from "src/dto/create_order.dto";
@@ -7,7 +7,7 @@ import { ValidationPipe } from "src/pipes/validation.pipe";
 import { OrderService } from "./order.service";
 
 
-@Controller('orders')
+@Controller('api/orders')
 export class OrderController {
     constructor(private readonly orderService: OrderService) {}
 
@@ -18,8 +18,8 @@ export class OrderController {
 
     @Get(":id")
     @HttpCode(HttpStatus.OK)
-    async getOrderById(@Param('id', ParseIntPipe) id: number) {
-        return await this.orderService.getById(id);
+    async getOrderById(@Param('id', ParseUUIDPipe) id: string) {
+        return await this.orderService.getByUserId(id);
     }
 
     @Post()

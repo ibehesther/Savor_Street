@@ -7,7 +7,7 @@ import { ValidationPipe } from "src/pipes/validation.pipe";
 import { OrderItemService } from "./order_item.service";
 
 
-@Controller('order_items')
+@Controller('api/order_items')
 export class OrderItemController {
     constructor(private readonly orderItemService: OrderItemService) {}
 
@@ -18,8 +18,8 @@ export class OrderItemController {
 
     @Get(":id")
     @HttpCode(HttpStatus.OK)
-    async getOrderItemById(@Param('id', ParseIntPipe) id: number) {
-        return await this.orderItemService.getById(id);
+    async getOrderItemByOrderId(@Param('id', ParseIntPipe) id: number) {
+        return await this.orderItemService.getByOrderId(id);
     }
 
     @Post()

@@ -6,7 +6,7 @@ import { ValidationPipe } from "src/pipes/validation.pipe";
 import { MenuItemService } from "./menu_item.service";
 
 
-@Controller('menu')
+@Controller('api/menu')
 export class MenuItemController {
     constructor(private readonly menuItemService: MenuItemService) {}
 

@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config/dist';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { connection } from 'ormconfig';
 import { AppController } from './app.controller';
+import { AppGateway } from './app.gateway';
 import { AppService } from './app.service';
 import { MenuItemModule } from './menu_item/menu_item.module';
 import { OrderModule } from './order/order.module';
@@ -37,7 +38,7 @@ import { UserModule } from './user/user.module';
     {
       provide: "APP_PIPE",
       useClass: ValidationPipe
-    }
+    }, AppGateway
   ],
 })
 export class AppModule {}
