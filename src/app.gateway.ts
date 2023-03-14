@@ -40,8 +40,24 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   @SubscribeMessage('handlePlaceOrder')
   async handlePlaceOrder(client: Socket, payload: any): Promise<void>{
     let order_mssg = generateMessage('SavorBot', placeOrderMessage(payload));
-    console.log(order_mssg);
     this.client.emit('confirmOrder', order_mssg)
+  }
+
+  @SubscribeMessage('handleConfirmOrder')
+  async handleConfirmOrder(client: Socket, payload: any): Promise<void>{
+    let order_mssg = generateMessage('SavorBot', {text: "Your order is being processed ..."});
+    this.client.emit('checkoutOrder', order_mssg)
+  }
+
+  @SubscribeMessage('handleOrderPayment')
+  async handleOrderPayment(client: Socket, id: any): Promise<void> {
+    let mssg = generateMessage('SavorBot', {text: `Congratulations! Your order with id ${id} has been checked out and ready for dispatch`});
+    this.client.emit('payOrder', mssg)
+  }
+
+  @SubscribeMessage('handleDisplayOrders')
+  async handleDisplayOrders(client: Socket, id: any): Promise<void> {
+
   }
 
   @SubscribeMessage('replyToWelcome')
@@ -52,13 +68,13 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
         this.client.emit('placeOrder');
         break;
       case('99'):
-        this.client.emit("CheckOutOrder", "Checking out order...");
+        this.client.emit("handleCheckOutOrder");
         break;
       case('98'):
-        this.client.emit("fetchOrderHistory", 'Fetching Order History...');
+        this.client.emit("handleFetchOrderHistory");
         break;  
       case('97'):
-        this.client.emit('fetchCurrentOrder', "Fetching current order...");
+        this.client.emit('handleFetchCurrentOrder');
         break;
       case("0"):
         this.client.emit('cancelOrder', "Canceling Order...");

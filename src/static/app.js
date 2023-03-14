@@ -4,22 +4,53 @@ const socket = io(URL);
 const msgCont = document.getElementById('data-container');
 const userForm = document.getElementById('user_form');
 const userInput = document.getElementById('user_input');
- 
+
 //get old messages from the server
-const messages = [];
-// function getMessages() {
-//  fetch('http://localhost:3000/api/chat')
-//    .then((response) => response.json())
-//    .then((data) => {
-//      loadDate(data);
-//      data.forEach((el) => {
-//        messages.push(el);
-//      });
-//    })
-//    .catch((err) => console.error(err));
-// }
-// getMessages();
  
+//----------------------------------------------------------------------
+// When a user press the enter key, send message.
+
+
+userForm.addEventListener('submit', async(e) => {
+  let validOptions = ['1', '99', '98', '97', '0', "menu"];
+  e.preventDefault();
+  let input = userInput.value.toLowerCase();
+  loadData({
+    user: "Me",
+    obj:{
+      text: input
+    },
+    createdAt: Date.now()
+  });
+
+  console.log(input)
+  switch(input){
+    case '1':
+      let menu = await getMenu();
+      loadMenu(menu);
+    case '99':
+    case '98':
+    case '97':
+    case'0':
+    case 'menu':
+      replyToWelcome(input);
+      break;
+    case 'confirm':
+      handleConfirmOrder();
+      break;
+    case input.match(/^m\d+/)?.input:
+    // case input.match(/^m\d+/)?.input:
+      handlePlaceOrder(input)
+      break;
+    default:
+      handleInvalidOption();
+  }
+  // Reset Input field
+  userInput.value= '';
+});
+//----------------------------------------------------------------------
+
+//----------------------------------------------------------------------
 // Get user 
 const getUser = async() => {
   let user_id = localStorage.getItem('user_id');
@@ -79,6 +110,16 @@ const createOrderItem = async(item, order, qty) => {
   return order_item;
 }
 
+const getMenuDetailsByOrderItems = async(order_items) => {
+  let menu = await getMenu();
+  let menu_details = [];
+  order_items.map((item) => {
+    let menu_item = menu.filter((itm) => itm.id === item.item_id)[0]
+    menu_details.push(menu_item)
+  })
+  return menu_details;
+}
+
 const getOrderItemsById = async(id) => {
   const order_items = await fetch(`${URL}/api/order_items/${id}`)
   .then((response) => response.json())
@@ -94,28 +135,25 @@ const getUserOrders = async() => {
   const user_orders = await fetch(`${URL}/api/orders/${user_id}`)
   .then((response) => response.json())
   .then((data) => {
-    console.log(data)
     return data
   })
   .catch(console.log);
   return user_orders;
 }
-const getOrderDetails = async(order, items) => {
-  let total = 0;
-  let s_order_items = [];
-  let s_menu_items = [];
-  let menu = await getMenu();
 
-  let { order_total, order_items, menu_items} = await getTotal(items, menu, order, s_order_items, s_menu_items, total);
-  await updateOrder(order.id, {total_order_amount: order_total});
+const getOrderDetails = async(order_items, menu_items) => {
+  let order_total = 0;
+  for(let item of order_items){
+    let menu_item = await getMenuItem(item.item_id);
+    
+    order_total += menu_item.price * item.quantity;
+  }
+
   return {order_total, order_items, menu_items}
 }
+
 const createOrder = async() => {
-  // let total = 0;
-  // let s_order_items = [];
-  // let s_menu_items = []
   let user_id = localStorage.getItem('user_id');
-  // let menu = await getMenu();
   let order = await fetch(`${URL}/api/orders`,{
     method: "POST",
     headers: {
@@ -129,13 +167,10 @@ const createOrder = async() => {
   })
   .catch(console.log);
   return order;
-  // let { order_total, order_items, menu_items} = await getTotal(items, menu, order, s_order_items, s_menu_items, total);
-  // await updateOrder(order.id, {total_order_amount: order_total});
-  // return {order_total, order_items, menu_items}
 }
 
 const updateOrder = async(id, body) => {
-  let order = await fetch(`${URL}/api/orders/${id}`,{
+  return await fetch(`${URL}/api/orders/${id}`,{
     method: "PATCH",
     headers: {
       'Content-Type': 'application/json'
@@ -149,20 +184,23 @@ const updateOrder = async(id, body) => {
   .catch(console.log);
 }
 
-const getTotal = async(items, menu, order, s_order_items,s_menu_items , total) => {
+const formatOrderItems = async(order, item_qty) => {
+  let order_total = 0
+  let menu = await getMenu();
   let i =0;
-  for(let item in items){
+  let order_items = [];
+  for(let item in item_qty){
     let id = item.replace('m', '')
-    id = parseInt(menu[id].id)
+    id = parseInt(menu[id-1].id)
     let menu_item = await getMenuItem(id);
-    let order_item = await createOrderItem(menu_item, order, items[item])
-    total += menu_item.price
-    s_order_items.push(order_item);
-    s_menu_items.push(menu_item);
+    order_total += menu_item.price * item_qty[item];
+    console.log(order_total, menu_item.price)
+    let order_item = await createOrderItem(menu_item, order, item_qty[item]);
+    order_items.push(order_item);
 
-    if(i === Object.keys(items).length - 1){
-      console.log({total, order_items: s_order_items})
-      return {order_total :total, order_items: s_order_items, menu_items : s_menu_items};
+    if(i === Object.keys(item_qty).length - 1){
+      await updateOrder(order.id, {total_order_amount: order_total});
+      return order_items;
     }
     i++;
   }
@@ -170,47 +208,52 @@ const getTotal = async(items, menu, order, s_order_items,s_menu_items , total) =
 }
 
 const handlePlaceOrder = async(input) => {
-  const user_orders = await getUserOrders()
-  console.log(user_orders)
-  if( user_orders[0] && user_orders[0].order_status === 'pending'){
-    console.log(getOrderDetails(user_orders[0]))
+  const user_orders = await getUserOrders();
+  console.log(user_orders[0])
+  if( user_orders[0] && user_orders[0].order_status === 'pending' || user_orders[0] && user_orders[0].payment_status === 'pending'){
+    console.log("You still have a pending order")
+   
+    let order_items = await getOrderItemsById(user_orders[0].id);
+    let menu_items = await getMenuDetailsByOrderItems(order_items);
+    let order_details = await getOrderDetails(order_items, menu_items);
+    
+    user_orders[0].payment_status === 'pending' ?  order_details.paid = false:  order_details.pending = true;
+    user_orders[0].order_status === 'pending' ?  order_details.pending = true:  order_details.pending = false;
+
+    console.log(order_details)
+    return socket.emit('handlePlaceOrder', order_details);
   }
-  let items = input.split(',');
-  let item_qty = {};
+  else if( user_orders[0] && user_orders[0].order_status !== 'pending' && user_orders[0].payment_status === 'pending'){
+    let mssg = {
+      user: "SavorBot",
+      obj: {text: "Please checkout current order before placing another.<br> Select 97 to see current order <br> Select 99 to checkout order"},
+      createdAt: Date.now()
+    };
+    return loadData(mssg)
+  }
+  else{
+    let items = input.split(',');
+    let item_qty = {};
 
-  items.map((item) => {
-    let item_arr = item.split('-');
-    item_qty[item_arr[0].trim()] = item_arr[1] && item_arr[1].trim()*1 || 1
-  });
-  let order = await createOrder();
-
-  console.log(order)
-  let order_details = getOrderDetails(order, item_qty)
-  console.log(order_details);
-  socket.emit('handlePlaceOrder', order_details);
+    items.map((item) => {
+      let item_arr = item.split('-');
+      item_qty[item_arr[0].trim()] = item_arr[1] && item_arr[1].trim()*1 || 1
+    });
+    let order = await createOrder();
+    let order_items = await formatOrderItems(order, item_qty);
+    let menu_items = await getMenuDetailsByOrderItems(order_items);
+    
+    let order_details = await getOrderDetails(order_items, menu_items)
+    socket.emit('handlePlaceOrder', order_details);
+  }
+  
 }
 
-// When a user press the enter key, send message.
-userForm.addEventListener('submit', async(e) => {
-  e.preventDefault();
-  let input = userInput.value.toLowerCase();
-  switch(input){
-    case('1' || '99' || '98' || '97' || '0'):
-      replyToWelcome(input);
-      break;
-    case('menu'):
-      replyToWelcome(input);
-      break;
-    case input.match(/^m\d+/)?.input:
-      handlePlaceOrder(input)
-      break;
-    default:
-      handleInvalidOption();
-  }
-
-  // Reset Input field
-  userInput.value= '';
-});
+const handleConfirmOrder = async() => {
+  const user_orders = await getUserOrders();
+  await updateOrder(user_orders[0].id, {order_status: "confirmed"})
+  socket.emit('handleConfirmOrder')
+}
  
 //Display messages to the users
 function loadData(data) {
@@ -256,7 +299,7 @@ const loadMenu = (menu) => {
   <p> 
     Please select the code that matches the item you would like to order
     and the quantity seperated by a dash.<br>
-    For example: To place an order for 2 serving of ${menu[0].name}, you type "m1-2". <br>
+    For example: To place an order for 2 serving(s) of '${menu[0].name}', you type "m1-2". <br>
     To place an order for more than one item, seperate each order item with a comma in the same format above. <br>
     For example: "m1-2,m3-1"
   </p>
@@ -264,17 +307,52 @@ const loadMenu = (menu) => {
   `
   msgCont.innerHTML += messages;
 }
+
+const loadOrders = (orders) => {
+  let messages = `
+  <div>
+    <table>
+      <tr> 
+        <th> Date </th>
+        <th> Order Items </th>
+        <th> Total &#8358; </th>
+        <th> status </th>
+        <th> paid </th>
+      </tr>
+   `
+   orders.map(async(order, sn) => {
+    let order_items = await getOrderItemsById(order.id)
+    let menu_items = await getMenuDetailsByOrderItems(order_items);
+    let length = menu_items.length;
+    let date_time = order.order_date_time
+    let start = date_time.indexOf('T')
+    let date = date_time.split('').splice(0,start).join('');
+    
+    messages += `
+    <tr>
+      <td rowspan="${length}"> ${date}</td>
+      <td> ${menu_items[0].name} ${order_items[0].quantity} </td>
+      <td rowspan="${length}"> ${order.total_order_amount} </td>
+      <td rowspan="${length}"> ${order.order_status} </td>
+      <td rowspan="${length}"> ${order.payment_status==='paid' ? "Yes": "No"} </td>
+    </tr>
+    <tr>
+      ${menu_items.filter((item, index) => index !==0 ).map((item, i) => {
+        return(`<td> ${item.name} ${order_items[i+1].quantity} </td>`)
+      })}
+    </tr>
+    `
+    if(sn === orders.length - 1){
+      messages +=  `</table><p>Type 'menu' to go back to main menu</p> </div>`
+
+      msgCont.innerHTML += messages;
+    }
+  })
+  
+  
+}
  
 //socket.io
-//emit sendMessage event to send message
-// function sendMessage(message) {
-//  socket.emit('sendMessage', message);
-// }
-//Listen to recMessage event to get the messages sent by users
-// socket.on('recMessage', (message) => {
-//  messages.push(message);
-//  loadDate(messages);
-// })
 socket.on('welcome', (message) => {
   let user = getUser();
   loadData(message);
@@ -292,6 +370,59 @@ socket.on('placeOrder', async() => {
 socket.on('confirmOrder',(message) => {
   loadData(message)
 } )
+
+socket.on('checkoutOrder',(message) => {
+  loadData(message)
+})
+
+socket.on('payOrder',(message) => {
+  loadData(message)
+} )
+
+
+socket.on('handleCheckOutOrder', async() => {
+  let mssg = {
+    user: "SavorBot",
+    obj: {text: "Please confirm current order before checkout.<br> Type 'confirm' to confirm pending order"},
+    createdAt: Date.now()
+  };
+  const user_orders = await getUserOrders();
+  const current_order = user_orders[0];
+  if(current_order.order_status === 'pending') return loadData(mssg);
+
+
+  let order = await updateOrder(current_order.id, {payment_status: "paid"})
+  socket.emit("handleOrderPayment", order.id)
+})
+
+socket.on('handleFetchOrderHistory', async() => {
+  const orders = await getUserOrders()
+  let mssg = {
+    user: "SavorBot",
+    obj: {text: "You have not placed any order, Let's fix that!.<br> Select 1 to place an order <br> Type 'menu' to go back to main menu"},
+    createdAt: Date.now()
+  };
+  if(!orders.length) return loadData(mssg);
+
+  loadOrders(orders)
+})
+
+socket.on('handleFetchCurrentOrder', async() => {
+  const orders = await getUserOrders();
+  let mssg = {
+    user: "SavorBot",
+    obj: {text: "No pending order.<br> Select 1 to place an order <br> Type 'menu' to go back to main menu"},
+    createdAt: Date.now()
+  };
+  if(!orders.length) return loadData(mssg)
+  if(orders[0] && orders[0].order_status !== "pending" && orders[0].payment_status !== "pending") return loadData(mssg);
+  
+  let currentOrder= orders[0];
+  let order_items = await getOrderItemsById(currentOrder.id);
+  let menu_items = await getMenuDetailsByOrderItems(order_items);
+  let order_details = await getOrderDetails(order_items, menu_items);
+  socket.emit('handlePlaceOrder', order_details);
+})
 
 // emit response to welcome message
 const replyToWelcome = (option) => {

@@ -21,5 +21,5 @@ export class UpdateOrderDTO{
 
     @IsNumber()
     @IsOptional()
-    total_order_amount= 0;
+    total_order_amount: number;
 }

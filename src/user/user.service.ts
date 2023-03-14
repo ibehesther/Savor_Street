@@ -17,8 +17,6 @@ export class UserService {
 
   async getUser(id: string): Promise<User|HttpException>{
     let user = await this.userRepository.findOneBy({id});
-    console.log(user)
-    // if(!user)  throw new NotFoundException("User does not exist")
     return user
   }
 

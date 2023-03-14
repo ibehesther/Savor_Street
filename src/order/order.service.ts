@@ -26,14 +26,23 @@ export class OrderService{
 
             },
             order: {
-                id: "ASC"
+                id: "DESC"
             }
         })
     }
 
-    async getByUserId(id: string): Promise<Order[] | HttpException> {
-        let orders =await this.orderRepository.findBy({user_id: id})
-
+    async getByUserId(id: string, query: APIFeatures): Promise<Order[] | HttpException> {
+        let { page= 1, limit= 10 } = query;
+        page *= 1;
+        limit *= 1;
+        let orders =await this.orderRepository.find({
+            skip: (page - 1) * limit,
+            take: limit,
+            where: {user_id: id},
+            order: {
+                id: "DESC"
+            }
+        });
         if(!orders) throw new NotFoundException(`Orders for user was not found in the database`);
 
         return orders;

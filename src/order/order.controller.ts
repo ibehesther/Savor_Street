@@ -18,8 +18,8 @@ export class OrderController {
 
     @Get(":id")
     @HttpCode(HttpStatus.OK)
-    async getOrderById(@Param('id', ParseUUIDPipe) id: string) {
-        return await this.orderService.getByUserId(id);
+    async getOrderById(@Param('id', ParseUUIDPipe) id: string, @Query() query: APIFeatures) {
+        return await this.orderService.getByUserId(id, query);
     }
 
     @Post()
