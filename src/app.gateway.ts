@@ -31,10 +31,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   @SubscribeMessage('handleInvalidOption')
   async handleInvalidOption(client: Socket, payload: any): Promise<void>{
-    let welcome_mssg = generateMessage("SavorBot", welcomeMessage);
     let default_response = generateMessage("SavorBot", invalidOptionMessage);
     this.client.emit('invalidOption', default_response);
-    this.client.emit('welcome', welcome_mssg);
   }
 
   @SubscribeMessage('handlePlaceOrder')
@@ -45,7 +43,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   @SubscribeMessage('handleConfirmOrder')
   async handleConfirmOrder(client: Socket, payload: any): Promise<void>{
-    let order_mssg = generateMessage('SavorBot', {text: "Your order is being processed ..."});
+    let order_mssg = generateMessage('SavorBot', {text: "Your order is being processed ... <br> Select 99 to checkout"});
     this.client.emit('checkoutOrder', order_mssg)
   }
 
@@ -55,9 +53,12 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.client.emit('payOrder', mssg)
   }
 
-  @SubscribeMessage('handleDisplayOrders')
+  @SubscribeMessage('cancelOrder')
   async handleDisplayOrders(client: Socket, id: any): Promise<void> {
-
+    let welcome_mssg = generateMessage("SavorBot", welcomeMessage);
+    let mssg = generateMessage('SavorBot', {text: `Your order with id ${id} has been cancelled`});
+    this.client.emit('payOrder', mssg);
+    this.client.emit('welcome', welcome_mssg);
   }
 
   @SubscribeMessage('replyToWelcome')
@@ -77,7 +78,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
         this.client.emit('handleFetchCurrentOrder');
         break;
       case("0"):
-        this.client.emit('cancelOrder', "Canceling Order...");
+        this.client.emit('handleCancelOrder')
         break;
       case('menu'):
         this.client.emit('welcome', welcome_mssg);

@@ -15,7 +15,7 @@ export const welcomeMessage: MessageDTO =  {
 }
 
 export const invalidOptionMessage: MessageDTO = {
-    text: 'You selected an invalid option. Please follow the menu instruction.'
+    text: 'You selected an invalid option. Please follow the menu instruction. <br> Type "menu" to go back to the main menu'
 }
 export function placeOrderMessage(order: any):MessageDTO {
     const {order_total, order_items, menu_items, pending, paid} = order;

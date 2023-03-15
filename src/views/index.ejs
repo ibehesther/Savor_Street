@@ -5,50 +5,31 @@
   <!-- Required meta tags -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
   <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous" />
-
+  <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous" /> -->
+  <link rel="stylesheet" href="style.css">
   <title>Savour Street</title>
 </head>
 
 <body>
   <nav class="navbar navbar-light bg-light">
     <div class="container-fluid">
-      <a class="navbar-brand">Lets Chat</a>
+      <a class="navbar-brand">SavorBot</a>
     </div>
   </nav>
   <div class="container">
     <div class="mb-3 mt-3">
       <ul style="list-style: none" id="data-container"></ul>
     </div>
-    <form id='user_form'>
-      <div class="mb-3 mt-4">
-        <input class="form-control" id='user_input' rows="3" placeholder="Say something..." />
-      </div>
-    </form>
+    
   </div>
-  <!-- <table>
-    <tr>
-      <th>Test 1</th>
-      <th>Test 2</th>
-      <th>Test 3</th>
-    </tr>
-    <tr>
-      <td rowspan="2">Response 1</td>
-      <td>
-        Response 2
-      </td>
-      <td>Response 3</td>
-    </tr>
-    <tr>
-      <td>
-        Response 2
-      </td>
-      <td>Response 3</td>
-    </tr>
-  </table> -->
+  <form id='user_form'>
+    <input class="form-control" id='user_input' rows="3" placeholder="Type a message" />
+    <button type="submit" class="form-submit"><i class="fas fa-paper-plane"></i></button>
+  </form>
   <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"
     integrity="sha384-KAZ4DtjNhLChOB/hxXuKqhMLYvx3b5MlT55xPEiNmREKRzeEm+RVPlTnAn0ajQNs"
     crossorigin="anonymous"></script>

@@ -4,6 +4,6 @@ export const generateMessage = (user: string, obj: MessageDTO) => {
     return {
         user,
         obj,
-        createdAt: moment(new Date().getTime()).format("YYYY-MM-DD HH:mm")
+        createdAt: moment(new Date().getTime()).format("HH:mm")
     }
 }

@@ -4,47 +4,80 @@ const socket = io(URL);
 const msgCont = document.getElementById('data-container');
 const userForm = document.getElementById('user_form');
 const userInput = document.getElementById('user_input');
+const container = document.querySelector('.container')
+const body = document.documentElement;
+
+const options_main = ["start", "menu", "0"]
+const options_99 = ["menu", "start", "97", "0"]
+const options_confirm = ['99'];
 
 //get old messages from the server
  
 //----------------------------------------------------------------------
 // When a user press the enter key, send message.
+const state = {current_value: 'start'};
 
+const scrollToBottom = () => {
+  body.scrollTop = body.scrollHeight;
+}
+
+const generateMssg = (user, input) => {
+  const date = new Date(Date.now());
+  let createdAt=date.toString().split(" ")[4];
+  createdAt = createdAt.split("").splice(0, 5).join('');
+
+  return {
+    user,
+    obj:{
+      text:  `<p> ${input} </p>`
+    },
+    createdAt
+  }
+}
 
 userForm.addEventListener('submit', async(e) => {
-  let validOptions = ['1', '99', '98', '97', '0', "menu"];
+  // let validOptions = ['1', '99', '98', '97', '0', "menu"];
   e.preventDefault();
-  let input = userInput.value.toLowerCase();
-  loadData({
-    user: "Me",
-    obj:{
-      text: input
-    },
-    createdAt: Date.now()
-  });
-
-  console.log(input)
+  const input = userInput.value.toLowerCase();
+  loadData(generateMssg("Me", input), "right");
+  
   switch(input){
-    case '1':
-      let menu = await getMenu();
-      loadMenu(menu);
-    case '99':
-    case '98':
-    case '97':
-    case'0':
     case 'menu':
       replyToWelcome(input);
       break;
+    case '1':
+    case '98':
+    case '97':
+    case'0':
+      if(options_main.includes(state.current_value)){
+        replyToWelcome(input);
+        break;
+      }
+      handleInvalidOption();
+      break;
+    case '99':
+      if(options_99.includes(state.current_value)){
+        replyToWelcome(input);
+        break;
+      }
+      handleInvalidOption();
+      break;
     case 'confirm':
-      handleConfirmOrder();
+      if(options_confirm.includes(state.current_value)){
+        handleConfirmOrder();
+        break;
+      }
+      handleInvalidOption();
       break;
     case input.match(/^m\d+/)?.input:
-    // case input.match(/^m\d+/)?.input:
-      handlePlaceOrder(input)
-      break;
+      if(state.current_value === '1'){
+        handlePlaceOrder(input); 
+        break;
+      } 
     default:
       handleInvalidOption();
   }
+  state.current_value= input;
   // Reset Input field
   userInput.value= '';
 });
@@ -53,7 +86,7 @@ userForm.addEventListener('submit', async(e) => {
 //----------------------------------------------------------------------
 // Get user 
 const getUser = async() => {
-  let user_id = localStorage.getItem('user_id');
+  const user_id = localStorage.getItem('user_id');
   return await fetch(`${URL}/api/users`,{
     method: 'POST',
     headers: {
@@ -79,7 +112,7 @@ const getMenu = async() => {
   .catch(console.log);
 }
 
-let getMenuItem = async(id) => {
+const getMenuItem = async(id) => {
   let menu_item = await fetch(`${URL}/api/menu/${id}`)
   .then((response) => response.json())
   .then((data) => {
@@ -194,7 +227,6 @@ const formatOrderItems = async(order, item_qty) => {
     id = parseInt(menu[id-1].id)
     let menu_item = await getMenuItem(id);
     order_total += menu_item.price * item_qty[item];
-    console.log(order_total, menu_item.price)
     let order_item = await createOrderItem(menu_item, order, item_qty[item]);
     order_items.push(order_item);
 
@@ -209,7 +241,6 @@ const formatOrderItems = async(order, item_qty) => {
 
 const handlePlaceOrder = async(input) => {
   const user_orders = await getUserOrders();
-  console.log(user_orders[0])
   if( user_orders[0] && user_orders[0].order_status === 'pending' || user_orders[0] && user_orders[0].payment_status === 'pending'){
     console.log("You still have a pending order")
    
@@ -220,7 +251,6 @@ const handlePlaceOrder = async(input) => {
     user_orders[0].payment_status === 'pending' ?  order_details.paid = false:  order_details.pending = true;
     user_orders[0].order_status === 'pending' ?  order_details.pending = true:  order_details.pending = false;
 
-    console.log(order_details)
     return socket.emit('handlePlaceOrder', order_details);
   }
   else if( user_orders[0] && user_orders[0].order_status !== 'pending' && user_orders[0].payment_status === 'pending'){
@@ -256,26 +286,39 @@ const handleConfirmOrder = async() => {
 }
  
 //Display messages to the users
-function loadData(data) {
-  let messages = `<div>`
-  messages += `<em>${data.user}</em> \n`;
+function loadData(data, direction) {
+  let messages = `
+  <div class='chat-container'>
+  ${direction === "left" ? 
+  "<img class='profile' src='./imgs/savor_street.png'>"
+  : 
+  ''}
+  <div class="message-container ${direction}">
+  `
+  // messages += `<em>${data.user}</em> \n`;
 
   let message = data.obj;
   messages += `<p>${message.text}<p>`;
-  messages += `<ul>`;
+  messages += `<ul class="options-container">`;
   message.options && message.options.map((option) => {
     messages += `<li class=""> ${option} </li>`;
   })
   messages += `</ul>`;
-  messages += `<p>${message.additional_text ? message.additional_text : ''}</p> <span class="fw-bolder">${data.createdAt}</span>`;
-  messages += '</div>';
+  messages += `<p>${message.additional_text ? message.additional_text : ''}</p> <span class="date">${data.createdAt}</span>`;
+  messages += '</div> </div>';
 
   msgCont.innerHTML += messages;
+  scrollToBottom()
 }
 
-const loadMenu = (menu) => {
+const loadMenu = (menu, direction) => {
   let messages = `
-  <div>
+  <div class="chat-container">
+  ${direction === "left" ? 
+  "<img class='profile' src='./imgs/savor_street.png'>"
+  : 
+  ''}
+  <div class="message-container left">
     <table>
       <tr> 
         <th> Code </th>
@@ -296,21 +339,29 @@ const loadMenu = (menu) => {
   })
   messages += `</table>`
   messages += `
-  <p> 
-    Please select the code that matches the item you would like to order
-    and the quantity seperated by a dash.<br>
-    For example: To place an order for 2 serving(s) of '${menu[0].name}', you type "m1-2". <br>
-    To place an order for more than one item, seperate each order item with a comma in the same format above. <br>
-    For example: "m1-2,m3-1"
-  </p>
+    <p> 
+      Please select the code that matches the item you would like to order
+      and the quantity seperated by a dash.<br>
+      For example: To place an order for 2 serving(s) of '${menu[0].name}', you type "m1-2". <br>
+      To place an order for more than one item, seperate each order item with a comma in the same format above. <br>
+      For example: "m1-2,m3-1" <br>
+      Type "menu" to go back to main menu
+    </p>
+    </div>
   </div>
   `
   msgCont.innerHTML += messages;
+  scrollToBottom();
 }
 
-const loadOrders = (orders) => {
+const loadOrders = (orders, direction) => {
   let messages = `
-  <div>
+  <div class='chat-container'>
+  ${direction === "left" ? 
+  "<img class='profile' src='./imgs/savor_street.png'>"
+  : 
+  ''}
+  <div class="message-container left">
     <table>
       <tr> 
         <th> Date </th>
@@ -331,22 +382,23 @@ const loadOrders = (orders) => {
     messages += `
     <tr>
       <td rowspan="${length}"> ${date}</td>
-      <td> ${menu_items[0].name} ${order_items[0].quantity} </td>
+      <td> ${menu_items[0].name} (${order_items[0].quantity}) </td>
       <td rowspan="${length}"> ${order.total_order_amount} </td>
       <td rowspan="${length}"> ${order.order_status} </td>
       <td rowspan="${length}"> ${order.payment_status==='paid' ? "Yes": "No"} </td>
     </tr>
     <tr>
       ${menu_items.filter((item, index) => index !==0 ).map((item, i) => {
-        return(`<td> ${item.name} ${order_items[i+1].quantity} </td>`)
+        return(`<td> ${item.name} (${order_items[i+1].quantity}) </td>`)
       })}
     </tr>
     `
     if(sn === orders.length - 1){
-      messages +=  `</table><p>Type 'menu' to go back to main menu</p> </div>`
+      messages +=  `</table><p>Type "menu" to go back to main menu</p> </div> </div>`
 
       msgCont.innerHTML += messages;
     }
+    scrollToBottom();
   })
   
   
@@ -355,39 +407,40 @@ const loadOrders = (orders) => {
 //socket.io
 socket.on('welcome', (message) => {
   let user = getUser();
-  loadData(message);
+  loadData(message, "left");
 });
 
 socket.on('invalidOption', (message) => {
-  loadData(message)
+  loadData(message, 'left')
 });
 
 socket.on('placeOrder', async() => {
   let menu = await getMenu();
-  loadMenu(menu);
+  loadMenu(menu, 'left');
 })
 
 socket.on('confirmOrder',(message) => {
-  loadData(message)
+  loadData(message, 'left')
 } )
 
 socket.on('checkoutOrder',(message) => {
-  loadData(message)
+  loadData(message, 'left')
 })
 
 socket.on('payOrder',(message) => {
-  loadData(message)
+  loadData(message, 'left')
 } )
 
 
 socket.on('handleCheckOutOrder', async() => {
   let mssg = {
     user: "SavorBot",
-    obj: {text: "Please confirm current order before checkout.<br> Type 'confirm' to confirm pending order"},
+    obj: {text: `Please confirm current order before checkout.<br> Type "confirm" to confirm pending order <br>Type "menu"`},
     createdAt: Date.now()
   };
   const user_orders = await getUserOrders();
   const current_order = user_orders[0];
+  
   if(current_order.order_status === 'pending') return loadData(mssg);
 
 
@@ -399,22 +452,23 @@ socket.on('handleFetchOrderHistory', async() => {
   const orders = await getUserOrders()
   let mssg = {
     user: "SavorBot",
-    obj: {text: "You have not placed any order, Let's fix that!.<br> Select 1 to place an order <br> Type 'menu' to go back to main menu"},
+    obj: {text: `You have not placed any order, Let's fix that!.<br> Select 1 to place an order <br> Type "menu" to go back to main menu`},
     createdAt: Date.now()
   };
   if(!orders.length) return loadData(mssg);
 
-  loadOrders(orders)
+  loadOrders(orders, 'left')
 })
 
 socket.on('handleFetchCurrentOrder', async() => {
   const orders = await getUserOrders();
   let mssg = {
     user: "SavorBot",
-    obj: {text: "No pending order.<br> Select 1 to place an order <br> Type 'menu' to go back to main menu"},
+    obj: {text: `No pending order.<br> Select 1 to place an order <br> Type "menu" to go back to main menu`},
     createdAt: Date.now()
   };
   if(!orders.length) return loadData(mssg)
+  if(orders[0] && orders[0].order_status === "cancelled") return loadData(mssg);
   if(orders[0] && orders[0].order_status !== "pending" && orders[0].payment_status !== "pending") return loadData(mssg);
   
   let currentOrder= orders[0];
@@ -422,6 +476,22 @@ socket.on('handleFetchCurrentOrder', async() => {
   let menu_items = await getMenuDetailsByOrderItems(order_items);
   let order_details = await getOrderDetails(order_items, menu_items);
   socket.emit('handlePlaceOrder', order_details);
+})
+
+socket.on("handleCancelOrder", async() => {
+  const orders = await getUserOrders();
+  let mssg = {
+    user: "SavorBot",
+    obj: {text: `No pending order.<br> Select 1 to place an order <br> Type "menu" to go back to main menu`},
+    createdAt: Date.now()
+  };
+
+  if(!orders.length) return loadData(mssg)
+  if(orders[0] && orders[0].order_status === "cancelled") return loadData(mssg);
+  if(orders[0] && orders[0].order_status !== "pending" && orders[0].payment_status !== "pending") return loadData(mssg);
+  
+  await updateOrder(orders[0].id, {order_status: "cancelled"})
+  socket.emit('cancelOrder', orders[0].id);
 })
 
 // emit response to welcome message
