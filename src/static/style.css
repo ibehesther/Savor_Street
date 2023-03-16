@@ -148,9 +148,6 @@ td, th{
     .left {
         margin: 0em 3em 1em 3em;
     }
-    .right{
-        /* margin: 0em 0em 1em 5em; */
-    }
     .container-fluid{
         height: 2.6em;
         font-size: 2em;
