@@ -441,7 +441,7 @@ socket.on('handleCheckOutOrder', async() => {
   const user_orders = await getUserOrders();
   const current_order = user_orders[0];
   
-  if(current_order.order_status === 'pending') return loadData(mssg);
+  if(current_order.order_status === 'pending') return loadData(mssg, 'left');
 
 
   let order = await updateOrder(current_order.id, {payment_status: "paid"})
@@ -455,7 +455,7 @@ socket.on('handleFetchOrderHistory', async() => {
     obj: {text: `You have not placed any order, Let's fix that!.<br> Select 1 to place an order <br> Type "menu" to go back to main menu`},
     createdAt: Date.now()
   };
-  if(!orders.length) return loadData(mssg);
+  if(!orders.length) return loadData(mssg, "left");
 
   loadOrders(orders, 'left')
 })
@@ -467,7 +467,7 @@ socket.on('handleFetchCurrentOrder', async() => {
     obj: {text: `No pending order.<br> Select 1 to place an order <br> Type "menu" to go back to main menu`},
     createdAt: Date.now()
   };
-  if(!orders.length) return loadData(mssg)
+  if(!orders.length) return loadData(mssg, "left")
   if(orders[0] && orders[0].order_status === "cancelled") return loadData(mssg);
   if(orders[0] && orders[0].order_status !== "pending" && orders[0].payment_status !== "pending") return loadData(mssg);
   
@@ -486,7 +486,7 @@ socket.on("handleCancelOrder", async() => {
     createdAt: Date.now()
   };
 
-  if(!orders.length) return loadData(mssg)
+  if(!orders.length) return loadData(mssg, 'left')
   if(orders[0] && orders[0].order_status === "cancelled") return loadData(mssg);
   if(orders[0] && orders[0].order_status !== "pending" && orders[0].payment_status !== "pending") return loadData(mssg);
   

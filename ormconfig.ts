@@ -26,6 +26,8 @@ export const connection : DataSourceOptions= {
     "username": configService.get('DATABASE_USER'),
     "password": configService.get('DATABASE_PASSWORD'),
     "database": configService.get('DATABASE_NAME'),
+    "connectTimeout": 10000,
+    "acquireTimeout": 10000,
     "entities": [
         MenuItem, 
         User,
