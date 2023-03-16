@@ -99,6 +99,6 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.client = client;
     console.log(`Connected ${client.id}`);
     let response =  generateMessage("SavorBot", welcomeMessage);
-    this.server.emit('welcome', response);
+    this.client.emit('welcome', response);
   }
 }
