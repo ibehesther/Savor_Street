@@ -1,5 +1,6 @@
 `use-strict`
-const URL='http://127.0.0.1:3000';
+// const URL='http://127.0.0.1:3000';
+const URL='https://savor-street.onrender.com';
 const socket = io(URL);
 const msgCont = document.getElementById('data-container');
 const userForm = document.getElementById('user_form');

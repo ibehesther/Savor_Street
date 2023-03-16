@@ -84,7 +84,6 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
         this.client.emit('welcome', welcome_mssg);
         break;
     }
-    // this.client.emit('replyToWelcome')
   }
   
   afterInit(server: Server) {

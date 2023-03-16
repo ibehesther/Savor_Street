@@ -2,7 +2,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { join, resolve } from 'path';
+import { resolve } from 'path';
 import { ConfigService } from '@nestjs/config';
 import { config } from 'dotenv';
 config();
@@ -25,6 +25,7 @@ async function bootstrap() {
   );
 
   app.enableCors();
+  console.log(configService.get('PORT'))
 
   await app.listen(configService.get('PORT') || 3000);
 }
