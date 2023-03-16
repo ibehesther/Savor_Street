@@ -21,7 +21,7 @@ const configService = new ConfigService();
 
 export const connection : DataSourceOptions= {
     "type": "mysql",
-    "host":  configService.get('DATABASE_host'),
+    "host":  configService.get('DATABASE_HOST'),
     "port": 3306,
     "username": configService.get('DATABASE_USER'),
     "password": configService.get('DATABASE_PASSWORD'),
