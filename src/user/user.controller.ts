@@ -23,7 +23,7 @@ export class UserController {
     constructor(private readonly userService: UserService) {}
 
     @Post()
-    async getUserSessionId(@Req() req: Request, @Res() res: Response, @Body(new ValidationPipe()) body: {user_id: string}){
+    async getUserSessionId(@Req() req: Request, @Res() res: Response, @Body(new ValidationPipe()) body: {user_id: string | undefined}){
         let userId = body.user_id;
         console.log(userId);
         if(userId){

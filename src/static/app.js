@@ -22,7 +22,7 @@ const scrollToBottom = () => {
   body.scrollTop = body.scrollHeight;
 }
 
-const generateMssg = (user, input) => {
+const generateMssg = (user="SavorBot", input) => {
   const date = new Date(Date.now());
   let createdAt=date.toString().split(" ")[4];
   createdAt = createdAt.split("").splice(0, 5).join('');
@@ -37,9 +37,9 @@ const generateMssg = (user, input) => {
 }
 
 userForm.addEventListener('submit', async(e) => {
-  // let validOptions = ['1', '99', '98', '97', '0', "menu"];
   e.preventDefault();
-  const input = userInput.value.toLowerCase();
+  const input = userInput.value.toLowerCase().trim();
+  if(!input) return e.preventDefault();
   loadData(generateMssg("Me", input), "right");
   
   switch(input){
@@ -57,14 +57,14 @@ userForm.addEventListener('submit', async(e) => {
       handleInvalidOption();
       break;
     case '99':
-      if(options_99.includes(state.current_value)){
+      if(options_99.includes(state.current_value) || state.current_value.match(/^m\d+/)?.input){
         replyToWelcome(input);
         break;
       }
       handleInvalidOption();
       break;
     case 'confirm':
-      if(options_confirm.includes(state.current_value)){
+      if(options_confirm.includes(state.current_value) || state.current_value.match(/^m\d+/)?.input){
         handleConfirmOrder();
         break;
       }
@@ -255,12 +255,8 @@ const handlePlaceOrder = async(input) => {
     return socket.emit('handlePlaceOrder', order_details);
   }
   else if( user_orders[0] && user_orders[0].order_status !== 'pending' && user_orders[0].payment_status === 'pending'){
-    let mssg = {
-      user: "SavorBot",
-      obj: {text: "Please checkout current order before placing another.<br> Select 97 to see current order <br> Select 99 to checkout order"},
-      createdAt: Date.now()
-    };
-    return loadData(mssg)
+    const text= "Please checkout current order before placing another.<br> Select 97 to see current order <br> Select 99 to checkout order";
+    return loadData(generateMssg(text))
   }
   else{
     let items = input.split(',');
@@ -287,7 +283,7 @@ const handleConfirmOrder = async() => {
 }
  
 //Display messages to the users
-function loadData(data, direction) {
+function loadData(data, direction='left') {
   let messages = `
   <div class='chat-container'>
   ${direction === "left" ? 
@@ -312,7 +308,7 @@ function loadData(data, direction) {
   scrollToBottom()
 }
 
-const loadMenu = (menu, direction) => {
+const loadMenu = (menu, direction='left') => {
   let messages = `
   <div class="chat-container">
   ${direction === "left" ? 
@@ -320,14 +316,15 @@ const loadMenu = (menu, direction) => {
   : 
   ''}
   <div class="message-container left">
-    <table>
-      <tr> 
-        <th> Code </th>
-        <th> Name </th>
-        <th> Description </th>
-        <th> Price &#8358; </th>
-      </tr>
-   `
+    <div class="menu-table">
+      <table class="menu-table">
+        <tr> 
+          <th> Code </th>
+          <th> Name </th>
+          <th> Description </th>
+          <th> Price &#8358; </th>
+        </tr>
+    `
   menu.map((item, sn) => {
     messages += `
     <tr>
@@ -340,22 +337,23 @@ const loadMenu = (menu, direction) => {
   })
   messages += `</table>`
   messages += `
-    <p> 
-      Please select the code that matches the item you would like to order
-      and the quantity seperated by a dash.<br>
-      For example: To place an order for 2 serving(s) of '${menu[0].name}', you type "m1-2". <br>
-      To place an order for more than one item, seperate each order item with a comma in the same format above. <br>
-      For example: "m1-2,m3-1" <br>
-      Type "menu" to go back to main menu
-    </p>
+      </div>
+      <p> 
+        Please select the code that matches the item you would like to order
+        and the quantity seperated by a dash.<br>
+        For example: To place an order for 2 serving(s) of '${menu[0].name}', you type "m1-2". <br>
+        To place an order for more than one item, seperate each order item with a comma in the same format above. <br>
+        For example: "m1-2,m3-1" <br>
+        Type "menu" to go back to main menu
+      </p>
     </div>
-  </div>
+    </div>
   `
   msgCont.innerHTML += messages;
   scrollToBottom();
 }
 
-const loadOrders = (orders, direction) => {
+const loadOrders = (orders, direction='left') => {
   let messages = `
   <div class='chat-container'>
   ${direction === "left" ? 
@@ -412,37 +410,33 @@ socket.on('welcome', (message) => {
 });
 
 socket.on('invalidOption', (message) => {
-  loadData(message, 'left')
+  loadData(message)
 });
 
 socket.on('placeOrder', async() => {
   let menu = await getMenu();
-  loadMenu(menu, 'left');
+  loadMenu(menu);
 })
 
 socket.on('confirmOrder',(message) => {
-  loadData(message, 'left')
+  loadData(message)
 } )
 
 socket.on('checkoutOrder',(message) => {
-  loadData(message, 'left')
+  loadData(message)
 })
 
 socket.on('payOrder',(message) => {
-  loadData(message, 'left')
+  loadData(message)
 } )
 
 
 socket.on('handleCheckOutOrder', async() => {
-  let mssg = {
-    user: "SavorBot",
-    obj: {text: `Please confirm current order before checkout.<br> Type "confirm" to confirm pending order <br>Type "menu"`},
-    createdAt: Date.now()
-  };
+  const text= `Please confirm current order before checkout.<br> Type "confirm" to confirm pending order <br>Type "menu"`
   const user_orders = await getUserOrders();
   const current_order = user_orders[0];
   
-  if(current_order.order_status === 'pending') return loadData(mssg, 'left');
+  if(current_order.order_status === 'pending') return loadData(generateMssg(text ));
 
 
   let order = await updateOrder(current_order.id, {payment_status: "paid"})
@@ -451,26 +445,19 @@ socket.on('handleCheckOutOrder', async() => {
 
 socket.on('handleFetchOrderHistory', async() => {
   const orders = await getUserOrders()
-  let mssg = {
-    user: "SavorBot",
-    obj: {text: `You have not placed any order, Let's fix that!.<br> Select 1 to place an order <br> Type "menu" to go back to main menu`},
-    createdAt: Date.now()
-  };
-  if(!orders.length) return loadData(mssg, "left");
+  const text= `You have not placed any order, Let's fix that!.<br> Select 1 to place an order <br> Type "menu" to go back to main menu`
+   
+  if(!orders.length) return loadData(generateMssg(text), "left");
 
-  loadOrders(orders, 'left')
+  loadOrders(orders)
 })
 
 socket.on('handleFetchCurrentOrder', async() => {
   const orders = await getUserOrders();
-  let mssg = {
-    user: "SavorBot",
-    obj: {text: `No pending order.<br> Select 1 to place an order <br> Type "menu" to go back to main menu`},
-    createdAt: Date.now()
-  };
-  if(!orders.length) return loadData(mssg, "left")
-  if(orders[0] && orders[0].order_status === "cancelled") return loadData(mssg);
-  if(orders[0] && orders[0].order_status !== "pending" && orders[0].payment_status !== "pending") return loadData(mssg);
+  const text= `No pending order.<br> Select 1 to place an order <br> Type "menu" to go back to main menu`;
+  if(!orders.length) return loadData(generateMssg(text), "left")
+  if(orders[0] && orders[0].order_status === "cancelled") return loadData(generateMssg(text));
+  if(orders[0] && orders[0].order_status !== "pending" && orders[0].payment_status !== "pending") return loadData(generateMssg(text));
   
   let currentOrder= orders[0];
   let order_items = await getOrderItemsById(currentOrder.id);
@@ -481,15 +468,11 @@ socket.on('handleFetchCurrentOrder', async() => {
 
 socket.on("handleCancelOrder", async() => {
   const orders = await getUserOrders();
-  let mssg = {
-    user: "SavorBot",
-    obj: {text: `No pending order.<br> Select 1 to place an order <br> Type "menu" to go back to main menu`},
-    createdAt: Date.now()
-  };
+  const text= `No pending order.<br> Select 1 to place an order <br> Type "menu" to go back to main menu`;
 
-  if(!orders.length) return loadData(mssg, 'left')
-  if(orders[0] && orders[0].order_status === "cancelled") return loadData(mssg);
-  if(orders[0] && orders[0].order_status !== "pending" && orders[0].payment_status !== "pending") return loadData(mssg);
+  if(!orders.length) return loadData(generateMssg(text))
+  if(orders[0] && orders[0].order_status === "cancelled") return loadData(generateMssg(text));
+  if(orders[0] && orders[0].order_status !== "pending" && orders[0].payment_status !== "pending") return loadData(generateMssg(text));
   
   await updateOrder(orders[0].id, {order_status: "cancelled"})
   socket.emit('cancelOrder', orders[0].id);
