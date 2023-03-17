@@ -361,14 +361,15 @@ const loadOrders = (orders, direction='left') => {
   : 
   ''}
   <div class="message-container left">
-    <table>
-      <tr> 
-        <th> Date </th>
-        <th> Order Items </th>
-        <th> Total &#8358; </th>
-        <th> status </th>
-        <th> paid </th>
-      </tr>
+    <div class="menu-table">
+      <table>
+        <tr> 
+          <th> Date </th>
+          <th> Order Items </th>
+          <th> Total &#8358; </th>
+          <th> status </th>
+          <th> paid </th>
+        </tr>
    `
    orders.map(async(order, sn) => {
     let order_items = await getOrderItemsById(order.id)
@@ -393,7 +394,7 @@ const loadOrders = (orders, direction='left') => {
     </tr>
     `
     if(sn === orders.length - 1){
-      messages +=  `</table><br><p>Type "menu" to go back to main menu</p> </div> </div>`
+      messages +=  `</table></div><br><p>Type "menu" to go back to main menu</p> </div> </div>`
 
       msgCont.innerHTML += messages;
     }
