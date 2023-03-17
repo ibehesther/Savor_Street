@@ -8,4 +8,8 @@ export class AppController {
   @Get()
   @Render('index')
   root() {}
+
+  @Get('/chat')
+  @Render('chat')
+  chat() {}
 }

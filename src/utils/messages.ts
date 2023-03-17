@@ -1,7 +1,7 @@
 import { MessageDTO } from "src/dto/message.dto";
 
 export const welcomeMessage: MessageDTO =  {
-    text: "Hello! Welcome to Savor Street Chatbot System. We are thrilled to have you here with us! <br> My name is SavorBot and I’m here to help you with anything you need during your visit. Please take a moment to browse through our menu of options below.",
+    text: "Hello! Welcome to Savor Street Chatbot System.<br> <br>I'm SavorBot, your personal assistant. How can I help you today?",
     options: [
         // 'Type A to view our menu',
         'Select 1 to place an order',
@@ -11,11 +11,12 @@ export const welcomeMessage: MessageDTO =  {
         'Select 97 to see current order',
         'Select 0 to cancel order'
     ],
-    additional_text: 'To make a selection, simply type the number that corresponds with your choice, as stated above. <br>And don’t worry, I’m here to guide you every step of the way. If you need to return to this menu at any time, just type “menu”.<br> Thank you for choosing Savor Street and we hope you have a wonderful experience with us!'
+    additional_text: `To make a selection, simply type the number that corresponds with your choice, as stated above. <br> <br>If you need help or want to return to this menu at any time, just type "menu" and I'll guide you back. <br> <br> Thank you for choosing Savor Street! We're here to make your experience as enjoyable as possible.
+    `
 }
 
 export const invalidOptionMessage: MessageDTO = {
-    text: 'You selected an invalid option. Please follow the menu instruction. <br> Type "menu" to go back to the main menu'
+    text: 'You selected an invalid option. Please follow the menu instruction. <br><br> Type "menu" to go back to the main menu'
 }
 export function placeOrderMessage(order: any):MessageDTO {
     const {order_total, order_items, menu_items, pending, paid} = order;

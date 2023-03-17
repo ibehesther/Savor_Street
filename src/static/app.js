@@ -317,12 +317,12 @@ const loadMenu = (menu, direction='left') => {
   ''}
   <div class="message-container left">
     <div class="menu-table">
-      <table class="menu-table">
+      <table>
         <tr> 
-          <th> Code </th>
+          <th class="code"> Code </th>
           <th> Name </th>
-          <th> Description </th>
-          <th> Price &#8358; </th>
+          <th class='description'> Description </th>
+          <th class="price"> Price &#8358; </th>
         </tr>
     `
   menu.map((item, sn) => {
@@ -340,10 +340,10 @@ const loadMenu = (menu, direction='left') => {
       </div>
       <p> 
         Please select the code that matches the item you would like to order
-        and the quantity seperated by a dash.<br>
-        For example: To place an order for 2 serving(s) of '${menu[0].name}', you type "m1-2". <br>
+        and the quantity seperated by a dash.<br><br>
+        For example: To place an order for 2 serving(s) of '${menu[0].name}', you type "m1-2". <br><br>
         To place an order for more than one item, seperate each order item with a comma in the same format above. <br>
-        For example: "m1-2,m3-1" <br>
+        For example: "m1-2,m3-1" <br><br>
         Type "menu" to go back to main menu
       </p>
     </div>
@@ -393,7 +393,7 @@ const loadOrders = (orders, direction='left') => {
     </tr>
     `
     if(sn === orders.length - 1){
-      messages +=  `</table><p>Type "menu" to go back to main menu</p> </div> </div>`
+      messages +=  `</table><br><p>Type "menu" to go back to main menu</p> </div> </div>`
 
       msgCont.innerHTML += messages;
     }
@@ -432,7 +432,7 @@ socket.on('payOrder',(message) => {
 
 
 socket.on('handleCheckOutOrder', async() => {
-  const text= `Please confirm current order before checkout.<br> Type "confirm" to confirm pending order <br>Type "menu"`
+  const text= `Please confirm current order before checkout.<br> Type "confirm" to confirm pending order <br><br>Type "menu" to go back to main menu`
   const user_orders = await getUserOrders();
   const current_order = user_orders[0];
   
@@ -445,7 +445,7 @@ socket.on('handleCheckOutOrder', async() => {
 
 socket.on('handleFetchOrderHistory', async() => {
   const orders = await getUserOrders()
-  const text= `You have not placed any order, Let's fix that!.<br> Select 1 to place an order <br> Type "menu" to go back to main menu`
+  const text= `You have not placed any order, Let's fix that!.<br> Select 1 to place an order <br><br> Type "menu" to go back to main menu`
    
   if(!orders.length) return loadData(generateMssg(text), "left");
 
@@ -468,7 +468,7 @@ socket.on('handleFetchCurrentOrder', async() => {
 
 socket.on("handleCancelOrder", async() => {
   const orders = await getUserOrders();
-  const text= `No pending order.<br> Select 1 to place an order <br> Type "menu" to go back to main menu`;
+  const text= `No pending order.<br> Select 1 to place an order <br><br> Type "menu" to go back to main menu`;
 
   if(!orders.length) return loadData(generateMssg(text))
   if(orders[0] && orders[0].order_status === "cancelled") return loadData(generateMssg(text));

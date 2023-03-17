@@ -8,32 +8,28 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato&display=swap">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
 
-  <link rel="stylesheet" href="css/index-style.css">
-  <title>Savor Street</title>
+  <link rel="stylesheet" href="css/chat-style.css">
+  <title>Savor Street - Chat</title>
 </head>
 
 <body>
   <nav class="navbar navbar-light bg-light">
     <div class="container-fluid">
-      <a href='/' class="navbar-brand">Savor Street</a>
+      <a href="/" class="nav-item"><i class="fas fa-chevron-left"></i></a>
+      <h1 class="navbar-brand">SavorBot</h1>
+      <i class="nav-item"></i>
     </div>
   </nav>
   <div class="container">
-    <div class="welcome-container">
-        <span class='welcome' style="--n:53;">
-            Welcome to Savor Street ChatBot Service
-        </span>
+    <div class="mb-3 mt-3">
+      <ul style="list-style: none" id="data-container"></ul>
     </div>
     
-    <p>
-        We're here to help you with all of your dining needs. 
-        Whether you're looking to make a reservation, order takeout, 
-        or just have a question about our menu, 
-        we're here to assist you.
-    </p>
-    <a href="/chat"><button>Get started</button></a>
-    
   </div>
+  <form id='user_form'>
+    <input class="form-control" id='user_input' rows="3" placeholder="Type a message" />
+    <button type="submit" class="form-submit"><i class="fas fa-paper-plane"></i></button>
+  </form>
   <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"
     integrity="sha384-KAZ4DtjNhLChOB/hxXuKqhMLYvx3b5MlT55xPEiNmREKRzeEm+RVPlTnAn0ajQNs"
     crossorigin="anonymous"></script>
