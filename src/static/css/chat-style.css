@@ -18,6 +18,9 @@ h1 {
 .navbar {
     width: 100%;
 }
+.fa-chevron-left {
+    color: black;
+}
 .navitem{
     flex: 1;
     max-width: 20%;

@@ -86,11 +86,11 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   }
 
   handleDisconnect(client: Socket) {
-    console.log(`Disconnected: ${client.id}`);
+    // console.log(`Disconnected: ${client.id}`);
   }
 
   async handleConnection(client: Socket, ...args: any[]) {
-    console.log(`Connected ${client.id}`);
+    // console.log(`Connected ${client.id}`);
     let response =  generateMessage("SavorBot", welcomeMessage);
     client.emit('welcome', response);
   }

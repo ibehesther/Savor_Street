@@ -22,7 +22,7 @@ a{
     color: white;
 }
 .container {
-    padding: 2em;
+    padding: 5em 2em;
 }
 .container .welcome, .container p{
     text-align: center;
@@ -30,9 +30,10 @@ a{
 }
 .welcome-container {
     text-align: center;
+    margin: 0 auto 2em;
 }
 .welcome {
-    font-size: 1.5em;
+    font-size: 1.8em;
     margin: 0 auto;
     text-align: center;
     font-weight: 800;

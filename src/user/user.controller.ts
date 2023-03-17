@@ -25,7 +25,6 @@ export class UserController {
     @Post()
     async getUserSessionId(@Req() req: Request, @Res() res: Response, @Body(new ValidationPipe()) body: {user_id: string | undefined}){
         let userId = body.user_id;
-        console.log(userId);
         if(userId){
             let user = await this.userService.getUser(userId);
             const token = generateJWT(userId);
