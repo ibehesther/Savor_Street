@@ -22,7 +22,7 @@ const scrollToBottom = () => {
   body.scrollTop = body.scrollHeight;
 }
 
-const generateMssg = (user="SavorBot", input) => {
+const generateMssg = (input, user="SavorBot") => {
   const date = new Date(Date.now());
   let createdAt=date.toString().split(" ")[4];
   createdAt = createdAt.split("").splice(0, 5).join('');
@@ -40,7 +40,7 @@ userForm.addEventListener('submit', async(e) => {
   e.preventDefault();
   const input = userInput.value.toLowerCase().trim();
   if(!input) return e.preventDefault();
-  loadData(generateMssg("Me", input), "right");
+  loadData(generateMssg(input, "Me"), "right");
   
   switch(input){
     case 'menu':
@@ -98,6 +98,7 @@ const getUser = async() => {
   .then((response) => response.json())
   .then((data) => {
     localStorage.setItem('user_id', data.id);
+    console.log(data)
     return data
 
   })
@@ -170,6 +171,7 @@ const getUserOrders = async() => {
   .then((response) => response.json())
   .then((data) => {
     return data
+    console.log(data)
   })
   .catch(console.log);
   return user_orders;
@@ -445,7 +447,7 @@ socket.on('handleCheckOutOrder', async() => {
 })
 
 socket.on('handleFetchOrderHistory', async() => {
-  const orders = await getUserOrders()
+  const orders = await getUserOrders();
   const text= `You have not placed any order, Let's fix that!.<br> Select 1 to place an order <br><br> Type "menu" to go back to main menu`
    
   if(!orders.length) return loadData(generateMssg(text), "left");
@@ -456,7 +458,9 @@ socket.on('handleFetchOrderHistory', async() => {
 socket.on('handleFetchCurrentOrder', async() => {
   const orders = await getUserOrders();
   const text= `No pending order.<br> Select 1 to place an order <br> Type "menu" to go back to main menu`;
-  if(!orders.length) return loadData(generateMssg(text), "left")
+  if(!orders.length){
+    return loadData(generateMssg(text), "left")
+  } 
   if(orders[0] && orders[0].order_status === "cancelled") return loadData(generateMssg(text));
   if(orders[0] && orders[0].order_status !== "pending" && orders[0].payment_status !== "pending") return loadData(generateMssg(text));
   
